@@ -1,8 +1,10 @@
-name := "rigby"
+name := "mckenzie"
 
 version := "0.1"
 
 scalaVersion := "2.13.6"
+
+idePackagePrefix := Some("org.pendula")
 
 val circeVersion = "0.14.1"
 
@@ -19,10 +21,6 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-api" % "1.7.32",
   "org.typelevel" %% "cats-core" % "2.3.0",
   "org.typelevel" %% "cats-effect" % "2.5.3",
-  "org.http4s" %% "http4s-blaze-server" % http4sVersion,
-  "org.http4s" %% "http4s-circe" % http4sVersion,
-  "org.http4s" %% "http4s-dsl" % http4sVersion,
-  "org.http4s" %% "http4s-client"  % http4sVersion,
   "software.amazon.awssdk" % "sqs" % "2.17.43",
   "org.typelevel" %% "cats-effect" % "2.5.3"
 )
