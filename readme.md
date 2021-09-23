@@ -10,8 +10,6 @@
 
 ## Credentials
 
-
-
 # Limitations, Improvements, Assumptions
 
 ## Validation
@@ -39,3 +37,20 @@ Amazon SQS stores all message queues and messages within a single, highly-availa
 
 Another self hosted solution may require more thought into data persistence
 and reliability.
+
+## Testing
+
+Ideally there would be tests that tested the end to end functionality of
+these services.
+
+# Test Payloads
+
+```
+{
+    "firstName": "elenor",
+    "lastName": "rigby",
+    "email": "erigby@abbey-road.com",
+    "phone": "0118 999",
+    "postcode": "NW8 9BD"
+}
+```

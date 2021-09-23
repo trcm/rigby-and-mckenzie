@@ -2,18 +2,12 @@ package com.pendula.rigby
 
 import cats.implicits._
 import io.circe.syntax._
-import software.amazon.awssdk.auth.credentials.{
-  AwsCredentials,
-  EnvironmentVariableCredentialsProvider,
-  StaticCredentialsProvider
-}
+import org.slf4j.Logger
+import software.amazon.awssdk.auth.credentials.{AwsCredentials, EnvironmentVariableCredentialsProvider, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsClient
-import software.amazon.awssdk.services.sqs.model.{
-  GetQueueUrlRequest,
-  SendMessageRequest,
-  SendMessageResponse
-}
+import software.amazon.awssdk.services.sqs.model.{GetQueueUrlRequest, SendMessageRequest, SendMessageResponse}
+
 import java.net.URI
 
 object SQS {
@@ -40,9 +34,10 @@ object SQS {
         .build()
     )
 
-  def sendMessage(client: SqsClient, queueUrl: String)(
+  def sendMessage(logger: Logger, client: SqsClient, queueUrl: String)(
       message: Inquiry
   ): Either[Throwable, Unit] = {
+    logger.debug(s"Sending message to $queueUrl - ${message}")
     val messageResponse = Either.catchNonFatal(
       client.sendMessage(
         SendMessageRequest
