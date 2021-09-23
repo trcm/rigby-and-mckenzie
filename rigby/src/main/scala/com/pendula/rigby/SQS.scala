@@ -1,17 +1,24 @@
 package com.pendula.rigby
 
 import cats.implicits._
-import software.amazon.awssdk.auth.credentials.{AwsCredentials, EnvironmentVariableCredentialsProvider, StaticCredentialsProvider}
+import io.circe.syntax._
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentials,
+  EnvironmentVariableCredentialsProvider,
+  StaticCredentialsProvider
+}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsClient
-import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest
-
+import software.amazon.awssdk.services.sqs.model.{
+  GetQueueUrlRequest,
+  SendMessageRequest,
+  SendMessageResponse
+}
 import java.net.URI
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 
 object SQS {
 
+  type MessageSender = Inquiry => Either[Throwable, Unit]
   val queueName: String = "church.fifo"
 
   def getQueue(client: SqsClient): Either[Throwable, String] =
@@ -33,16 +40,20 @@ object SQS {
         .build()
     )
 
-  def sendMessage(client: SqsClient, queueUrl: String)(message: String): String = {
-    val messageResponse: SendMessageResponse = client.sendMessage(
-      SendMessageRequest
-        .builder()
-        .queueUrl(queueUrl)
-        .messageBody(message)
-        .messageGroupId("1")
-        .build()
+  def sendMessage(client: SqsClient, queueUrl: String)(
+      message: Inquiry
+  ): Either[Throwable, Unit] = {
+    val messageResponse = Either.catchNonFatal(
+      client.sendMessage(
+        SendMessageRequest
+          .builder()
+          .queueUrl(queueUrl)
+          .messageBody(message.asJson.toString())
+          .messageGroupId("1")
+          .build()
+      )
     )
-    println(messageResponse.messageId())
-    messageResponse.messageId()
+    // We're only interested in failure
+    messageResponse.map(_ => ())
   }
 }
