@@ -61,7 +61,10 @@ object SQS {
     val inquires = t match {
       case (errors, inquires) =>
         // TODO: Use a proper logger and log these failures.
-        println(errors)
+        if (errors.nonEmpty) {
+          println("Error parsing messages")
+          println(errors)
+        }
         inquires
     }
 

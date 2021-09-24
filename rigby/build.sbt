@@ -26,3 +26,5 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "sqs" % "2.17.43",
   "org.typelevel" %% "cats-effect" % "2.5.3"
 )
+
+enablePlugins(DockerPlugin)
