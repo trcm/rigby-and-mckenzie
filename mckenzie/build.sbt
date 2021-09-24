@@ -1,4 +1,4 @@
-name := "mckenzie"
+name := "com/pendula/mckenzie"
 
 version := "0.1"
 

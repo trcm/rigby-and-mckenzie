@@ -12,6 +12,12 @@
 
 # Limitations, Improvements, Assumptions
 
+## Error Handling
+
+The error handling in this application is fairly naive, in a proper application
+Throwables would be wrapped and put into and an Error type designed for the
+service.
+
 ## Validation
 
 There is very little (read, no) validation for the request payload on the Rigby
@@ -42,6 +48,21 @@ and reliability.
 
 Ideally there would be tests that tested the end to end functionality of
 these services.
+
+## Configuration
+
+Ideally these services would be configurable via environment variables to allow
+the queues, ports, etc to be configured when the service is started.
+
+## Code structure
+
+There is some repeated code for setting up helpers. In a real world application
+this would probably be refactored into its own module (ie. SQS Helpers, data types).
+
+## Templating
+
+In a real application a proper templating engine would be used to render a nicer
+looking email. In this application just a string template is used.
 
 # Test Payloads
 
