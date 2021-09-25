@@ -49,6 +49,11 @@ templated email response.
 
 McKenzie will continue to loop using 20 second polling on the `church` queue.
 
+One caveat here is that Mckenzie deletes the messages from the queue once it has
+pulled them and ensured it can decode them. Ideally we'd want to probably
+delete them once we have confirmation that they had been sent or that
+they had been passed off to the system that would send them.
+
 # Building
 
 The docker images can be build using `build-docker` make target.
