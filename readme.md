@@ -2,15 +2,66 @@
 
 ## Rigby
 
+Rigby is a simple Http4s application that connects to an SQS FIFO queue
+and exposes one endpoint at `POST /hook`.
+
+This hook endpoint accepts a JSON payload of the format:
+
+```
+    {
+       firstName: string,
+       lastName: string,
+       email: string,
+       phone: string,
+       postcode: string
+    }
+```
+
+eg.
+
+```
+{
+    "firstName": "Paul",
+    "lastName": "McCartney",
+    "email": "paul@beatles.com",
+    "phone": "011 999",
+    "postcode": "NW8 DBD"
+}
+```
+
+Assumptions about the service and its requests are listed below.
+
 ## McKenzie
+
+McKenzie is a scala service that will connect to the same SQS FIFO queue
+as Rigby. It will use long polling to receive any messages put onto the queue,
+
 
 # Building
 
+The docker images can be build using `build-docker` make target.
+This will create two docker images named `rigby` and `mckenzie` tagged
+with the current git revision hash.
+
 # Deploying
+
+The services can be deployed using the `deploy` target. This will
+create the SQS service, create the chuck FIFO queue, and spin up
+the services.  There is only very primitive service dependency checking,
+ie. the services will just try and restart until they can create
+a client with the SQS instance.
+
+The services and be torn down using the `teardown` target.
 
 ## Credentials
 
+All AWS credentials have been hard coded to "test" for the services.
+
 # Limitations, Improvements, Assumptions
+
+There are a number of TODOs in the code indicating where there is room for
+improvement, however, I've listed a number of items that could be improved
+and listed any assumptions made during development.
 
 ## Error Handling
 
@@ -67,11 +118,29 @@ looking email. In this application just a string template is used.
 # Test Payloads
 
 ```
-{
+curl --location --request POST 'http://localhost:8080/hook' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
     "firstName": "elenor",
     "lastName": "rigby",
     "email": "erigby@abbey-road.com",
-    "phone": "0118 999",
-    "postcode": "NW8 9BD"
-}
+    "phone": "011 999",
+    "postcode": "NW8 DBD"
+}'
 ```
+
+This will trigger an "Accepted" template response from McKenzie.
+
+```
+curl --location --request POST 'http://localhost:8080/hook' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
+    "firstName": "elenor",
+    "lastName": "rigby",
+    "email": "erigby@abbey-road.com",
+    "phone": "011 999",
+    "postcode": "MS8 DBD"
+}'
+```
+
+This will trigger a "Declined" template response from McKenzie

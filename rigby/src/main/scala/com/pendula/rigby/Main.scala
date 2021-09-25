@@ -27,6 +27,7 @@ object Main extends IOApp {
       .as(ExitCode.Success)
 
   def run(args: List[String]): IO[ExitCode] = {
+    println("Starting Rigby...")
     Service.createService().fold(
       logAndDie,
       runServer

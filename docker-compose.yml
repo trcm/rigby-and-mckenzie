@@ -1,6 +1,23 @@
 version: "3.8"
 
 services:
+
+  rigby:
+    container_name: "rigby"
+    image: rigby:${HASH}
+    network_mode: host
+    depends_on:
+      - "localstack"
+    restart: always
+
+  mckenzie:
+    container_name: "mckenzie"
+    image: mckenzie:${HASH}
+    network_mode: host
+    depends_on:
+      - "localstack"
+    restart: always
+
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
     image: localstack/localstack
@@ -23,3 +40,4 @@ services:
     volumes:
       - "${TMPDIR:-/tmp}/localstack:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./localstack-init:/docker-entrypoint-initaws.d"

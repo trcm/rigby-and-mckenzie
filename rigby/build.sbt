@@ -1,3 +1,5 @@
+import scala.sys.process._
+
 name := "rigby"
 
 version := "0.1"
@@ -28,3 +30,30 @@ libraryDependencies ++= Seq(
 )
 
 enablePlugins(DockerPlugin)
+
+docker / dockerfile := {
+  // Pulled from the sbt-docker help
+  val jarFile: File = (Compile / packageBin / sbt.Keys.`package`).value
+  val classpath = (Compile / managedClasspath).value
+  val mainclass = (Compile / packageBin / mainClass).value.getOrElse(sys.error("Expected exactly one main class"))
+  val jarTarget = s"/app/${jarFile.getName}"
+  val classpathString = classpath.files.map("/app/" + _.getName)
+    .mkString(":") + ":" + jarTarget
+
+  new Dockerfile {
+    from("openjdk:8-jre-alpine")
+    add(classpath.files, "/app/")
+    add(jarFile, jarTarget)
+    // these are hard coded but should be configurable
+    env("AWS_ACCESS_KEY_ID" -> "test", "AWS_SECRET_ACCESS_KEY" -> "test")
+    entryPoint("java", "-cp", classpathString, mainclass)
+  }
+}
+
+docker / imageNames := Seq{
+  ImageName(
+    repository = name.value,
+    // rev-parse HEAD has a newline at the end
+    tag = Some("git rev-parse HEAD".!!.trim())
+  )
+}
