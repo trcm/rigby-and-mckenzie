@@ -11,6 +11,6 @@ object Config {
       client <- SQS.createClient()
       baseUrl <- SQS.getQueue(client)
     } yield {
-      Config(client, baseUrl, Mailer.createMailer())
+      Config(client, baseUrl, Mailer.sendMail)
     }
 }

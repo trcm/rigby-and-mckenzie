@@ -1,5 +1,12 @@
 # Services
 
+Pendula code sample for Tom Midson.
+
+This code uses the following:
+- Scala (http4s, cats, circe)
+- Docker/Docker compose
+- SQS (Localstack)
+
 ## Rigby
 
 Rigby is a simple Http4s application that connects to an SQS FIFO queue
@@ -36,6 +43,11 @@ Assumptions about the service and its requests are listed below.
 McKenzie is a scala service that will connect to the same SQS FIFO queue
 as Rigby. It will use long polling to receive any messages put onto the queue,
 
+Once it has pulled the messages, it can remove them from the queue,
+generate the required templates and send (in this case print to stdout) the
+templated email response.
+
+McKenzie will continue to loop using 20 second polling on the `church` queue.
 
 # Building
 

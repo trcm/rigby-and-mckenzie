@@ -2,9 +2,7 @@ package com.pendula.mckenzie
 
 object Mailer {
 
-  type MailerClient = String
-
-  def createMailer() = "thing"
+  type MailerClient = (Inquiry, String) => Either[Throwable, String]
 
   def acceptedTemplate(firstName: String, lastName: String) = s"""
 Dear $firstName $lastName,
@@ -35,7 +33,8 @@ Regards,
 Father McKenzie
 """
 
-
+  // We're only interested in postcodes starting with NW8, this assumes that the
+  // data is formatted correctly.
   def generateTemplate(inquiry: Inquiry): String = inquiry.postcode.take(3) match {
     case "NW8" => acceptedTemplate(inquiry.firstName, inquiry.lastName)
     case _ => declinedTemplate(inquiry.firstName, inquiry.lastName)
