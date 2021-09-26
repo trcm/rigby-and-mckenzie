@@ -62,6 +62,11 @@ they had been passed off to the system that would send them.
 
 Assumptions about the service and its requests are listed below.
 
+# Tests
+
+There are some simple tests in Rigby and Mckenzie which can be run with
+`make test`.
+
 # Building
 
 The docker images can be build using `build-docker` make target.
