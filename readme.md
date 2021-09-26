@@ -36,6 +36,12 @@ eg.
 }
 ```
 
+The service will respond as follows:
+
+- 202 - If the payload is valid and it can send the message to SQS
+- 502 - If the payload is valid but it cannot send the message to SQS
+- 400 - If the payload is invalid
+
 Assumptions about the service and its requests are listed below.
 
 ## McKenzie
@@ -54,6 +60,8 @@ pulled them and ensured it can decode them. Ideally we'd want to probably
 delete them once we have confirmation that they had been sent or that
 they had been passed off to the system that would send them.
 
+Assumptions about the service and its requests are listed below.
+
 # Building
 
 The docker images can be build using `build-docker` make target.
@@ -63,13 +71,13 @@ with the current git revision hash.
 # Deploying
 
 The services can be deployed using the `deploy` target. This will
-create the SQS service, create the chuck FIFO queue, and spin up
+create the SQS service, create the `church` FIFO queue, and spin up
 the services.  There is only very primitive service dependency checking,
 ie. the services will just try and restart until they can create
 a client with the SQS instance.
 
 "Deploying" in this case is just running locally on the machine. In a proper
-setup there would be some orchetration of resources needed for the services,
+setup there would be some orchestration of resources needed for the services,
 likely through an IaC tool such as terraform or pulumi. This configuration would
 ideally create the SQS queue before the services are run for the first time.
 
@@ -98,8 +106,8 @@ to be improved before deploying.
 
 There is very little (read, no) validation for the request payload on the Rigby
 service webhook.  The spec indicates that this data is coming from an external
-CRM system so I'm assuming well formed data is being sent. Real world there
-should probably be a bit more validation on the input.
+CRM system so I'm assuming well formed data is being sent. In the real world
+there should probably be a bit more validation on the input.
 
 ## Authentication
 
@@ -123,7 +131,8 @@ and reliability.
 ## Testing
 
 Ideally there would be tests that tested the end to end functionality of
-these services.
+these services. At the moment there are basic service tests in Rigby
+and some basic postcode validation and template generation tests in Mckenzie.
 
 ## Configuration
 
@@ -146,9 +155,11 @@ looking email. In this application just a string template is used.
 
 # Test Payloads
 
+This will trigger an "Accepted" template response from McKenzie.
+
 ```
-curl --location --request POST 'http://localhost:8080/hook' \
---header 'Content-Type: text/plain' \
+curl -v --location --request POST 'http://localhost:8080/hook' \
+--header 'Content-Type: application/json' \
 --data-raw '{
     "firstName": "elenor",
     "lastName": "rigby",
@@ -158,11 +169,11 @@ curl --location --request POST 'http://localhost:8080/hook' \
 }'
 ```
 
-This will trigger an "Accepted" template response from McKenzie.
+This will trigger a "Declined" template response from McKenzie
 
 ```
-curl --location --request POST 'http://localhost:8080/hook' \
---header 'Content-Type: text/plain' \
+curl -v --location --request POST 'http://localhost:8080/hook' \
+--header 'Content-Type: application/json' \
 --data-raw '{
     "firstName": "elenor",
     "lastName": "rigby",
@@ -172,10 +183,10 @@ curl --location --request POST 'http://localhost:8080/hook' \
 }'
 ```
 
-This will trigger a "Declined" template response from McKenzie
+This should return with `400 - Bad Request` due to invalid json.
 
 ```
-curl --location --request POST 'http://localhost:8080/hook' \
+curl -v --location --request POST 'http://localhost:8080/hook' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "firstName": "Paul",
@@ -185,4 +196,17 @@ curl --location --request POST 'http://localhost:8080/hook' \
 }'
 ```
 
-This should return with `400 - Bad Request`
+This should return `400 - Bad Request` due to Content-Type: text/plain
+not being accepted by the service.
+
+```
+curl -v --location --request POST 'http://localhost:8080/hook' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
+    "firstName": "Paul",
+    "lastName": "McCartney",
+    "email": "paul@beatles.com",
+    "phone": "011 999",
+    "postcode": "NW8 A77"
+}'
+```
