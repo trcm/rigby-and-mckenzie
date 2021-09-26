@@ -1,16 +1,10 @@
 package com.pendula.mckenzie
 
 import software.amazon.awssdk.services.sqs.SqsClient
-import software.amazon.awssdk.services.sqs.model.{
-  DeleteMessageBatchRequest,
-  DeleteMessageRequest,
-  GetQueueUrlRequest,
-  Message,
-  ReceiveMessageRequest,
-  ReceiveMessageResponse
-}
+import software.amazon.awssdk.services.sqs.model.{DeleteMessageBatchRequest, DeleteMessageRequest, GetQueueUrlRequest, Message, ReceiveMessageRequest, ReceiveMessageResponse}
 import cats.implicits._
 import io.circe.parser.decode
+import org.slf4j.Logger
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider
 import software.amazon.awssdk.regions.Region
 
@@ -39,31 +33,29 @@ object SQS {
         .build()
     )
 
-  def getMessages(client: SqsClient, queueUrl: String): List[Inquiry] = {
+  def getMessages(logger: Logger, client: SqsClient, queueUrl: String): List[Inquiry] = {
     // TODO: Handle errors here
-    val messages: ReceiveMessageResponse = client.receiveMessage(
+    val messages: List[Message] = client.receiveMessage(
       ReceiveMessageRequest
         .builder()
         .queueUrl(queueUrl)
         // long poll
         .waitTimeSeconds(20)
-        // hide the messages from subsequent
-        // receive calls to give us time to pop them from the queue
-        // and process them
+        // hide the messages from subsequent receive calls to give us time to
+        // pop them from the queue
         .visibilityTimeout(30)
         .build()
-    )
-    val m: List[Message] = messages.messages().asScala.toList
-    // We care about decode failures, partition them so we can log them
-    val t =
-      m.map(mprime => decode[Inquiry](mprime.body())).partitionMap(identity)
+    ).messages().asScala.toList
 
-    val inquires = t match {
+    // We care about decode failures, partition them so we can log them
+    val parsedMessages =
+      messages.map(message => decode[Inquiry](message.body())).partitionMap(identity)
+
+    val inquires = parsedMessages match {
       case (errors, inquires) =>
-        // TODO: Use a proper logger and log these failures.
         if (errors.nonEmpty) {
-          println("Error parsing messages")
-          println(errors)
+          logger.error("Error parsing messages")
+          logger.error(errors.toString())
         }
         inquires
     }
@@ -71,7 +63,7 @@ object SQS {
     // Delete the message so its not processed again.
     // Errors are treated as invalid requests and will be deleted.
     // TODO: Handle errors during deletion
-    m.map(message => {
+    messages.map(message => {
       client.deleteMessage(
         DeleteMessageRequest
           .builder()

@@ -6,6 +6,7 @@ import io.circe.generic.semiauto._
 import org.http4s.EntityDecoder
 import org.http4s.circe._
 
+//TODO: Refactor this into a module shared between Rigby and McKenzie
 final case class Inquiry(
   firstName: String,
   lastName: String,

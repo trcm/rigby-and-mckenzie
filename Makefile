@@ -12,3 +12,7 @@ deploy:
 
 teardown:
 	docker-compose -f docker-compose.yml down
+
+test:
+	sbt "project rigby" test
+	sbt "project mckenzie" test

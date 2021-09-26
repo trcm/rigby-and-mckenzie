@@ -6,12 +6,12 @@ object Service {
 
   def runService(config: Config): IO[ExitCode] = {
     while (true) {
-      println("Polling for messages...")
-      val messages = SQS.getMessages(config.client, config.queueUrl)
-      println(s"Recieved ${messages.size} messages")
+      config.logger.info("Polling for messages...")
+      val messages = SQS.getMessages(config.logger, config.client, config.queueUrl)
+      config.logger.info(s"Recieved ${messages.size} messages")
 
       // TODO: Handle errors
-      Mailer.processAndSendMail(messages)
+      Mailer.processAndSendMail(config.mailer, messages)
     }
     IO.pure(ExitCode.Success)
 

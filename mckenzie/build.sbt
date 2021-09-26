@@ -25,6 +25,17 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-effect" % "2.5.3"
 )
 
+libraryDependencies ++= Seq(
+  "org.scalactic" %% "scalactic" % "3.2.9",
+  "org.scalatest" %% "scalatest" % "3.2.9" % "test",
+  "org.scalatest" %% "scalatest-wordspec" % "3.2.9" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.14.1" % "test",
+  "org.scalatest" %% "scalatest-propspec" % "3.2.9" % "test",
+  "org.scalatestplus" %% "scalacheck-1-14" % "3.1.1.1" % Test
+)
+
+resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases"
+
 enablePlugins(DockerPlugin)
 
 docker / dockerfile := {

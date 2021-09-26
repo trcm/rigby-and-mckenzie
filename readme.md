@@ -68,6 +68,11 @@ the services.  There is only very primitive service dependency checking,
 ie. the services will just try and restart until they can create
 a client with the SQS instance.
 
+"Deploying" in this case is just running locally on the machine. In a proper
+setup there would be some orchetration of resources needed for the services,
+likely through an IaC tool such as terraform or pulumi. This configuration would
+ideally create the SQS queue before the services are run for the first time.
+
 The services and be torn down using the `teardown` target.
 
 ## Credentials
@@ -85,6 +90,9 @@ and listed any assumptions made during development.
 The error handling in this application is fairly naive, in a proper application
 Throwables would be wrapped and put into and an Error type designed for the
 service.
+
+The error handling around the AWS java sdk is also pretty light, it would need
+to be improved before deploying.
 
 ## Validation
 
@@ -121,6 +129,10 @@ these services.
 
 Ideally these services would be configurable via environment variables to allow
 the queues, ports, etc to be configured when the service is started.
+
+There would also be validation for things such as whether the queue being
+passed to the service actually exists, or perhaps some code that would create it.
+Ideally this creation would happen as part of an infrastructure deployment.
 
 ## Code structure
 
@@ -161,3 +173,16 @@ curl --location --request POST 'http://localhost:8080/hook' \
 ```
 
 This will trigger a "Declined" template response from McKenzie
+
+```
+curl --location --request POST 'http://localhost:8080/hook' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "firstName": "Paul",
+    "lastName": "McCartney",
+    "email": "paul@beatles.com",
+    "phone": "011 999"
+}'
+```
+
+This should return with `400 - Bad Request`

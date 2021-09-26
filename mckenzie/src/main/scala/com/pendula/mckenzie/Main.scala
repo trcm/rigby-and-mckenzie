@@ -14,8 +14,8 @@ object Main extends IOApp {
   }
 
   override def run(args: List[String]): IO[ExitCode] = {
-    println("Starting Mckenzie...")
-    val getConfig = Config.createConfig()
+    logger.debug("Starting McKenzie...")
+    val getConfig = Config.createConfig(logger)
 
     getConfig.fold(
       logAndDie,
